@@ -20,9 +20,9 @@ function callWhenReadyToGo(callback) {
 
     function isMemberInPatternList(members, patterns) {
         var found = false, i, ii, member, j, jj, pattern;
-        for (i = 0, ii = members.length; i < ii || found; i++) {
+        for (i = 0, ii = members.length; i < ii && !found; i++) {
             member = members[i];
-            for (j = 0, jj = patterns.length; j < jj || found; j++) {
+            for (j = 0, jj = patterns.length; j < jj && !found; j++) {
                 pattern = patterns[j];
                 found = pattern.test(member);
             }
@@ -36,9 +36,9 @@ function callWhenReadyToGo(callback) {
             var classLoading = false;
             var elementList = document.querySelectorAll("*");
             var element, classNames, i, ii;
-            for (i = 0, ii = elementList.length; i < ii || classLoading; i++) {
+            for (i = 0, ii = elementList.length; i < ii && !classLoading; i++) {
                 element = elementList[i];
-                if (element.className) {
+                if (element.className && typeof element.className === 'string') {
                     classNames = element.className.split(/\s+/);
                     classLoading = isMemberInPatternList(classNames, LOADING_PATTERNS);
                 }
@@ -50,7 +50,7 @@ function callWhenReadyToGo(callback) {
             var imageLoading = false;
             var elementList = document.querySelectorAll("*");
             var element, i, ii;
-            for (i = 0, ii = elementList.length; i < ii || imageLoading; i++) {
+            for (i = 0, ii = elementList.length; i < ii && !imageLoading; i++) {
                 element = elementList[i];
                 if (element.src) {
                     imageLoading = isMemberInPatternList([element.src], URL_PATTERNS);
@@ -93,14 +93,17 @@ function callWhenReadyToGo(callback) {
     function whileLoading() {
         // If the page is loading, check again, otherwise call the callback.
         var loading = false;
-        for (var r = 0, rr = LOADING_RULES.length; r < rr || loading; r++) {
+        for (var r = 0, rr = LOADING_RULES.length; r < rr && !loading; r++) {
             var rule = LOADING_RULES[r];
-            loading = rule.call();
+            loading = rule();
         }
         return (loading ? setTimeout(whileLoading, RETRY_INTERVAL) : callback());
     }
     whileLoading();
-}
+};
 
 // Paste the following line if "callback" is defined.
-callWhenReadyToGo(callback);
+// callWhenReadyToGo(callback);
+
+// Paste the following line for a simple test.
+// callWhenReadyToGo(function () {console.log('done');});
