@@ -76,7 +76,9 @@ function callWhenReadyToGo(callback) {
             if (VERBOSITY && itemLoading) {console.log('items', state.itemCount, _itemCount);}
             state.itemCount = _itemCount;
             return itemLoading;
-        },
+        }
+    ];
+    var TIMEOUT_RULES = [
         function() {
             // Check maximum number of retries and time limit.
             var loading = true;
@@ -100,9 +102,17 @@ function callWhenReadyToGo(callback) {
     function whileLoading() {
         // If the page is loading, check again, otherwise call the callback.
         var loading = false;
-        for (var r = 0, rr = LOADING_RULES.length; r < rr && !loading; r++) {
-            var rule = LOADING_RULES[r];
+        var r, rr, rule;
+        for (r = 0, rr = LOADING_RULES.length; r < rr && !loading; r++) {
+            rule = LOADING_RULES[r];
             loading = rule();
+        }
+        if (loading) {
+            loading = false;
+            for (r = 0, rr = TIMEOUT_RULES.length; r < rr && !loading; r++) {
+                rule = TIMEOUT_RULES[r];
+                loading = rule();
+            }
         }
         return (loading ? setTimeout(whileLoading, RETRY_INTERVAL) : callback());
     }
