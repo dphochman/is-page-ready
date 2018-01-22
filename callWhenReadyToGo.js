@@ -20,7 +20,8 @@ function callWhenReadyToGo(callback) {
     };
 
     function isMemberInPatternList(members, patterns) {
-        var found = false, i, ii, member, j, jj, pattern;
+        var found = false,
+            i, ii, member, j, jj, pattern;
         for (i = 0, ii = members.length; i < ii && !found; i++) {
             member = members[i];
             for (j = 0, jj = patterns.length; j < jj && !found; j++) {
@@ -32,7 +33,7 @@ function callWhenReadyToGo(callback) {
     }
 
     var LOADING_RULES = [
-        function() {
+        function () {
             // If any element displays text "loading", the page is loading.
             var classLoading = false;
             var elementList = document.querySelectorAll("*");
@@ -42,12 +43,14 @@ function callWhenReadyToGo(callback) {
                 if (element.className && typeof element.className === 'string') {
                     classNames = element.className.split(/\s+/);
                     classLoading = isMemberInPatternList(classNames, LOADING_PATTERNS);
-                    if (VERBOSITY && classLoading) {console.log('className', i, element.tagName, element.className);}
+                    if (VERBOSITY && classLoading) {
+                        console.log('className', i, element.tagName, element.className);
+                    }
                 }
             }
             return classLoading;
         },
-        function() {
+        function () {
             // If any element is a visible loading / spinner image, the page is loading.
             var imageLoading = false;
             var elementList = document.querySelectorAll("*");
@@ -56,43 +59,54 @@ function callWhenReadyToGo(callback) {
                 element = elementList[i];
                 if (element.src) {
                     imageLoading = isMemberInPatternList([element.src], URL_PATTERNS);
-                    if (VERBOSITY && imageLoading) {console.log('image.src', i, element.tagName, element.src);}
+                    if (VERBOSITY && imageLoading) {
+                        console.log('image.src', i, element.tagName, element.src);
+                    }
                 }
             }
             return imageLoading;
         },
-        function() {
+        function () {
             // If number of list containers has changed, page is still loading.
             var _listCount = document.querySelectorAll(LIST_SELECTORS).length;
             var listLoading = _listCount !== state.listCount;
-            if (VERBOSITY && listLoading) {console.log('lists', state.listCount, _listCount);}
+            if (VERBOSITY && listLoading) {
+                console.log('lists', state.listCount, _listCount);
+            }
             state.listCount = _listCount;
             return listLoading;
         },
-        function() {
+        function () {
             // If number of list items has changed, page is still loading.
             var _itemCount = document.querySelectorAll(ITEM_SELECTORS).length;
             var itemLoading = _itemCount !== state.itemCount;
-            if (VERBOSITY && itemLoading) {console.log('items', state.itemCount, _itemCount);}
+            if (VERBOSITY && itemLoading) {
+                console.log('items', state.itemCount, _itemCount);
+            }
             state.itemCount = _itemCount;
             return itemLoading;
         }
     ];
     var TIMEOUT_RULES = [
-        function() {
+        function () {
             // Check maximum number of retries and time limit.
             state.retryCount = state.retryCount + 1;
             var loading = (RETRY_MAX && state.retryCount > RETRY_MAX) ? false : true;
-            if (VERBOSITY && !loading) {console.log('retries', state.retryCount);}
+            if (VERBOSITY && !loading) {
+                console.log('retries', state.retryCount);
+            }
             return loading;
         },
-        function() {
+        function () {
             var now = new Date().getTime();
             var loading = (RETRY_UNTIL && (now > RETRY_UNTIL)) ? false : true;
-            if (VERBOSITY && !loading) {console.log('timeout', new Date(now).toString());}
+            if (VERBOSITY && !loading) {
+                console.log('timeout', new Date(now).toString());
+            }
             return loading;
         }
     ];
+
     function whileLoading() {
         // If the page is loading, check again, otherwise call the callback.
         var loading = false;
