@@ -81,21 +81,15 @@ function callWhenReadyToGo(callback) {
     var TIMEOUT_RULES = [
         function() {
             // Check maximum number of retries and time limit.
-            var loading = true;
             state.retryCount = state.retryCount + 1;
-            if (RETRY_MAX && state.retryCount > RETRY_MAX) {
-                loading = false;
-            }
-            if (VERBOSITY && loading) {console.log('retries', state.retryCount);}
+            var loading = (RETRY_MAX && state.retryCount > RETRY_MAX) ? false : true;
+            if (VERBOSITY && !loading) {console.log('retries', state.retryCount);}
             return loading;
         },
         function() {
-            var loading = true;
             var now = new Date().getTime();
-            if (RETRY_UNTIL && (now > RETRY_UNTIL)) {
-                loading = false;
-            }
-            if (VERBOSITY && loading) {console.log('time');}
+            var loading = (RETRY_UNTIL && (now > RETRY_UNTIL)) ? false : true;
+            if (VERBOSITY && !loading) {console.log('timeout', new Date(now).toString());}
             return loading;
         }
     ];
@@ -108,8 +102,7 @@ function callWhenReadyToGo(callback) {
             loading = rule();
         }
         if (loading) {
-            loading = false;
-            for (r = 0, rr = TIMEOUT_RULES.length; r < rr && !loading; r++) {
+            for (r = 0, rr = TIMEOUT_RULES.length; r < rr && loading; r++) {
                 rule = TIMEOUT_RULES[r];
                 loading = rule();
             }
