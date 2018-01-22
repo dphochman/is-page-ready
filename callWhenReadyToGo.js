@@ -5,12 +5,13 @@
 function callWhenReadyToGo(callback) {
     var START_TIME = new Date().getTime();
     var RETRY_INTERVAL = 1000;
-    var RETRY_MAX = 99; // 0 => no limit of retries.
-    var RETRY_UNTIL = START_TIME + 90000; // 0 => retry forever.
+    var RETRY_MAX = 22; // 0 => no limit of retries.
+    var RETRY_UNTIL = START_TIME + 20000; // 0 => retry forever.
     var LOADING_PATTERNS = [/^loading/i, /^isloading/i];
     var URL_PATTERNS = [/(loading|spinner|loader)\.(gif|jpg|png)/i];
     var LIST_SELECTORS = ['ul', 'ol', 'table', 'tbody', 'select'].join(', ');
     var ITEM_SELECTORS = ['li', 'tr', 'td', 'option'].join(', ');
+    var VERBOSITY = 1;
 
     var state = {
         retryCount: 0,
@@ -41,6 +42,7 @@ function callWhenReadyToGo(callback) {
                 if (element.className && typeof element.className === 'string') {
                     classNames = element.className.split(/\s+/);
                     classLoading = isMemberInPatternList(classNames, LOADING_PATTERNS);
+                    if (VERBOSITY && classLoading) {console.log('className', i, element.tagName, element.className);}
                 }
             }
             return classLoading;
@@ -54,6 +56,7 @@ function callWhenReadyToGo(callback) {
                 element = elementList[i];
                 if (element.src) {
                     imageLoading = isMemberInPatternList([element.src], URL_PATTERNS);
+                    if (VERBOSITY && imageLoading) {console.log('image.src', i, element.tagName, element.src);}
                 }
             }
             return imageLoading;
@@ -62,6 +65,7 @@ function callWhenReadyToGo(callback) {
             // If number of list containers has changed, page is still loading.
             var _listCount = document.querySelectorAll(LIST_SELECTORS).length;
             var listLoading = _listCount !== state.listCount;
+            if (VERBOSITY && listLoading) {console.log('lists', state.listCount, _listCount);}
             state.listCount = _listCount;
             return listLoading;
         },
@@ -69,6 +73,7 @@ function callWhenReadyToGo(callback) {
             // If number of list items has changed, page is still loading.
             var _itemCount = document.querySelectorAll(ITEM_SELECTORS).length;
             var itemLoading = _itemCount !== state.itemCount;
+            if (VERBOSITY && itemLoading) {console.log('items', state.itemCount, _itemCount);}
             state.itemCount = _itemCount;
             return itemLoading;
         },
@@ -79,6 +84,7 @@ function callWhenReadyToGo(callback) {
             if (RETRY_MAX && state.retryCount > RETRY_MAX) {
                 loading = false;
             }
+            if (VERBOSITY && loading) {console.log('retries', state.retryCount);}
             return loading;
         },
         function() {
@@ -87,6 +93,7 @@ function callWhenReadyToGo(callback) {
             if (RETRY_UNTIL && (now > RETRY_UNTIL)) {
                 loading = false;
             }
+            if (VERBOSITY && loading) {console.log('time');}
             return loading;
         }
     ];
